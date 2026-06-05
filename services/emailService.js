@@ -1,29 +1,30 @@
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    pass: process.env.EMAIL_PASS
+  }
 });
 
-const sendEnquiryEmail = async (data) => {
-  await transporter.sendMail({
+const sendEnquiryEmail = async ({ name, email, phone, message }) => {
+  const mailOptions = {
     from: process.env.EMAIL_USER,
     to: process.env.EMAIL_USER,
-    subject: "New FriendlyStay Enquiry",
+    subject: `New Enquiry from ${name} – FriendlyStay`,
     html: `
-      <h2>New Enquiry Received</h2>
+            <h2>New Enquiry Received</h2>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Message:</strong> ${message}</p>
+        `
+  };
 
-      <p><b>Name:</b> ${data.name}</p>
-      <p><b>Email:</b> ${data.email}</p>
-      <p><b>Phone:</b> ${data.phone}</p>
-
-      <p><b>Message:</b></p>
-      <p>${data.message}</p>
-    `
-  });
+  await transporter.sendMail(mailOptions);
 };
 
-module.exports = sendEnquiryEmail;
+module.exports = { sendEnquiryEmail };
