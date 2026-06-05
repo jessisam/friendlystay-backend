@@ -8,6 +8,7 @@ const app = express();
 // Routes
 const enquiryRoutes = require("./routes/enquiry");
 const reviewRoutes = require("./routes/reviews");
+const adminRoutes = require("./routes/admin"); // NEW
 
 // Database
 const pool = require("./db");
@@ -24,6 +25,7 @@ app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
 app.use("/api/enquiry", enquiryRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/admin", adminRoutes); // NEW
 
 app.get("/", (req, res) => {
     res.send("FriendlyStay Backend Running");
