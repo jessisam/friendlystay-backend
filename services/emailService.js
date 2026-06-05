@@ -1,34 +1,20 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  family: 4,  // Force IPv4
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEnquiryEmail = async ({ name, email, phone, message }) => {
-  const mailOptions = {
-    from: `"FriendlyStay" <${process.env.EMAIL_USER}>`,
-    to: process.env.EMAIL_USER,
-    subject: `New Enquiry from ${name} – FriendlyStay`,
-    html: `
+    await resend.emails.send({
+        from: 'FriendlyStay <onboarding@resend.dev>',
+        to: 'appy49824@gmail.com',
+        subject: `New Enquiry from ${name} – FriendlyStay`,
+        html: `
             <h2>New Enquiry Received</h2>
             <p><strong>Name:</strong> ${name}</p>
             <p><strong>Email:</strong> ${email}</p>
             <p><strong>Phone:</strong> ${phone}</p>
             <p><strong>Message:</strong> ${message}</p>
         `
-  };
-
-  await transporter.sendMail(mailOptions);
+    });
 };
 
 module.exports = { sendEnquiryEmail };
