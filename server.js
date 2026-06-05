@@ -10,6 +10,15 @@ const enquiryRoutes = require("./routes/enquiry");
 const reviewRoutes = require("./routes/reviews");
 const adminRoutes = require("./routes/admin"); // NEW
 
+// Public properties route
+app.get('/api/properties', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM properties ORDER BY id');
+        res.json({ success: true, properties: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 // Database
 const pool = require("./db");
 
