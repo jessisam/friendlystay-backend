@@ -2,26 +2,12 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
+const https = require("https");
 
 const app = express();
-
-// Routes
-const enquiryRoutes = require("./routes/enquiry");
-const reviewRoutes = require("./routes/reviews");
-const adminRoutes = require("./routes/admin"); // NEW
-
-// Public properties route
-app.get('/api/properties', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT * FROM properties ORDER BY id');
-        res.json({ success: true, properties: result.rows });
-    } catch (error) {
-        res.status(500).json({ success: false, message: error.message });
-    }
-});
-// Database
 const pool = require("./db");
 
+// Middleware - must come first
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -30,15 +16,26 @@ app.use(cors({
 app.use(express.json());
 
 // Routes
+const enquiryRoutes = require("./routes/enquiry");
+const reviewRoutes = require("./routes/reviews");
+const adminRoutes = require("./routes/admin");
+
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+app.get("/", (req, res) => res.send("FriendlyStay Backend Running"));
+
+app.get('/api/properties', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM properties ORDER BY id');
+        res.json({ success: true, properties: result.rows });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 app.use("/api/enquiry", enquiryRoutes);
 app.use("/api/reviews", reviewRoutes);
-app.use("/api/admin", adminRoutes); // NEW
-
-app.get("/", (req, res) => {
-    res.send("FriendlyStay Backend Running");
-});
+app.use("/api/admin", adminRoutes);
 
 // Database Connection Test
 pool.query("SELECT NOW()", (err, result) => {
@@ -46,19 +43,17 @@ pool.query("SELECT NOW()", (err, result) => {
         console.error("Database connection failed:", err);
     } else {
         console.log("Database connected!");
-        console.log(result.rows[0]);
     }
 });
 
-// Keep-alive ping to prevent cold starts
-const https = require('https');
+// Keep-alive ping
 setInterval(() => {
     https.get('https://friendlystay-backend-production.up.railway.app/health', (res) => {
         console.log('Keep-alive ping:', res.statusCode);
     }).on('error', (err) => {
         console.log('Ping failed:', err.message);
     });
-}, 4 * 60 * 1000); // every 4 minutes
+}, 4 * 60 * 1000);
 
 app.listen(5000, () => {
     console.log("Server running on port 5000");
