@@ -4,6 +4,21 @@ const pool = require('../db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { verifyToken, JWT_SECRET } = require('../middleware/auth');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary,
+    params: { folder: 'friendlystay-docs', resource_type: 'raw', allowed_formats: ['pdf'] },
+});
+const upload = multer({ storage });
 
 // ─── LOGIN ───────────────────────────────────────────
 router.post('/login', async (req, res) => {
@@ -126,23 +141,7 @@ router.put('/properties/:id', verifyToken, async (req, res) => {
     }
 });
 
-const multer = require('multer');
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-const storage = new CloudinaryStorage({
-    cloudinary,
-    params: { folder: 'friendlystay-docs', resource_type: 'raw', allowed_formats: ['pdf'] },
-});
-const upload = multer({ storage });
-
-// Upload document for a property
+// ─── DOCUMENT UPLOAD ─────────────────────────────────
 router.post('/properties/:id/document', verifyToken, upload.single('document'), async (req, res) => {
     try {
         const url = req.file.path;
