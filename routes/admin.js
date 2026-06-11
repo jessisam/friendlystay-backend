@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 const { verifyToken, JWT_SECRET } = require('../middleware/auth');
 const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinaryStorage = require('multer-storage-cloudinary');
+const CloudinaryStorage = cloudinaryStorage.CloudinaryStorage || cloudinaryStorage;
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
